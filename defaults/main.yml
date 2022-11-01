@@ -1,0 +1,16 @@
+---
+
+# Custom commands to execute before the first boot role
+potos_firstboot_precommands: []
+
+# Custom commands to execute after the first boot role
+potos_firstboot_postcommands: []
+
+# Script to determine hostname
+potos_firstboot_hostname_script: ''
+
+# If user can select his keyboard layout
+potos_firstboot_ask_keyboardlayout: true
+
+# Sentence to ask user to select a keyboard layout
+potos_firstboot_ask_select_keyboardlayout: 'Please select a keyboard layout'
