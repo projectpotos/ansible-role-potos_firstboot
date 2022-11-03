@@ -16,6 +16,10 @@
    - potos_firstboot_precommands is not string
    - potos_firstboot_precommands is not mapping
 
+- name: Install yad
+  ansible.builtin.package:
+    name: 'yad'
+
 - name: Ask for keyboard layout
   block:
     - name: deploy script for keyboard layout selection
@@ -30,16 +34,32 @@
       ansible.builtin.shell:
         cmd: '/setup/change-keyboard-layout'
       register: potos_firstboot_keyboard_layout
+      changed_when: false
 
+    - name: check if keyboard file exists
+      ansible.builtin.stat:
+        path: '/etc/default/keyboard'
+      register: potos_firstboot_default_keyboard_stat
+    
     - name: set keyboard layout
       ansible.builtin.replace:
         path: '/etc/default/keyboard'
-        regexp: 'XKBLAYOUT=\"\w*\"'
-        replace: 'XKBLAYOUT=\"{{ potos_firstboot_keyboard_layout.stdout }}\"'
+        regexp: 'XKBLAYOUT="\w*"'
+        replace: 'XKBLAYOUT="{{ potos_firstboot_keyboard_layout.stdout }}"'
+      when: potos_firstboot_default_keyboard_stat.stat.exists
+
+    - name: check if gsettings is installed
+      ansible.builtin.shell:
+        cmd: 'gsettings help'
+      failed_when: false
+      changed_when: false
+      register: potos_firstboot_gsettings_exists
 
     - name: set keyboard layout in gnome
       ansible.builtin.shell:
-        cmd: 'gsettings set org.gnome.desktop.input-sources sources "[(\'xkb\', \'{{ potos_firstboot_keyboard_layout.stdout }}\')]"'
+        cmd: "gsettings set org.gnome.desktop.input-sources sources '[(\"xkb\", \"{{ potos_firstboot_keyboard_layout.stdout }}\")]'"
+      changed_when: false
+      when: potos_firstboot_gsettings_exists.rc == 0
 
   when: potos_firstboot_ask_keyboardlayout
 
@@ -95,7 +115,9 @@
 - name: Set hostname fact
   ansible.builtin.set_fact:
     potos_firstboot_hostname: '{{ potos_firstboot_hostname_script_out.stdout }}'
-  when: potos_firstboot_hostname_script.rc == 0
+  when:
+    - potos_firstboot_hostname_script_check.stat.exists
+    - potos_firstboot_hostname_script_check.rc == 0
 
 - name: Ask for hostname
   ansible.builtin.shell:
@@ -134,15 +156,20 @@
     path: '/etc/default/grub'
     regexp: 'GRUB_CMDLINE_LINUX_DEFAULT=.*'
     replace: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"'
+  tags:
+    - 'molecule-notest'
 
 - name: Write grub entries
   ansible.builtin.copy:
     path: '/etc/grub.d/40_custom'
     content: 'menuentry {{ potos_firstboot_hostname }} { \n echo {{ potos_firstboot_hostname }} \n}'
+  when: potos_firstboot_hostname is defined
 
 - name: Update grub
   ansible.builtin.shell:
     cmd: '/usr/sbin/update-grub'
+  tags:
+    - 'molecule-notest'
 
 - name: Post commands
   ansible.builtin.shell:

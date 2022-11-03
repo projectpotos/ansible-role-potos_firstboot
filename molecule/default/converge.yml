@@ -3,7 +3,9 @@
 - name: Converge
   hosts: all
   gather_facts: yes
-  tasks: []
+  vars:
+    runtype: 'firstboot'
+  tasks:
     - name: run role
       ansible.builtin.include_role:
         name: 'ansible-role-potos_firstboot'

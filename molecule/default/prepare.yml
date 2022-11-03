@@ -10,3 +10,10 @@
     ansible.builtin.shell:  # noqa: command-instead-of-module
       cmd: 'apt-get update && apt-get upgrade -y'
     when: ansible_distribution == 'Ubuntu'
+  - name: install gnome
+    ansible.builtin.apt:
+      name: '{{ item }}'
+      state: present
+    loop:
+      - 'gnome-session'
+      - 'gdm3'
