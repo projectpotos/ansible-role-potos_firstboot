@@ -22,12 +22,12 @@
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: |
-      while [[ -z ${HOSTNAME} ]]; do
+      while [[ -z ${POTOS_HOSTNAME} ]]; do
         USERINPUT='$(yad --title "Hostname" \
           --borders 20 --center --button gtk-ok \
           --form --field "Hostname:"
         )'
         HOSTNAME='${echo ${USERINPUT} | cut -d "|" -f 1}}'
       done
-      echo $HOSTNAME
+      echo $POTOS_HOSTNAME
   register: potos_firstboot_hostname_dialog
