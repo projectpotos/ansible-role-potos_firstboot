@@ -1,5 +1,3 @@
----
-
 - name: Prepare setup directory
   ansible.builtin.file:
     path: '/setup'
@@ -25,14 +23,14 @@
     - name: deploy script for keyboard layout selection
       ansible.builtin.template:
         src: 'change-keyboard-layout.j2'
-        dest: '/setup/change-keyboard-layout'
+        dest: '/setup/change-keyboard-layout2'
         mode: '0755'
         owner: root
         group: root
 
     - name: ask dialog
       ansible.builtin.shell:
-        cmd: '/setup/change-keyboard-layout'
+        cmd: '/setup/change-keyboard-layout2'
       register: potos_firstboot_keyboard_layout
       changed_when: false
 
@@ -60,123 +58,3 @@
         cmd: "gsettings set org.gnome.desktop.input-sources sources '[(\"xkb\", \"{{ potos_firstboot_keyboard_layout.stdout }}\")]'"
       changed_when: false
       when: potos_firstboot_gsettings_exists.rc == 0
-
-  when: potos_firstboot_ask_keyboardlayout
-
-
-- name: Ask user credentials
-  ansible.builtin.shell:
-    executable: '/bin/bash'
-    cmd: |
-      while [[ -z ${DOMAIN_JOIN_PASS} ]]; do
-        USERINPUT="$(yad --title '{{ potos_fistboot_ask_credentials.title | default("Potos Linux Client Setup") }}' \
-          --borders 20 --fullscreen \
-          --button gtk-ok --button "Change keyboard layout":"/setup/change-keyboard-layout" \
-          --image-on-top --image=/setup/potos.png \
-          --text \
-            "{{POTOS_VERSION}} Please enter the password for the domain join user (USER@ad.potos.local) and the Wi-Fi" \
-          --form \
-          --field 'AD join password' \
-          --field 'Wi-Fi password'
-        )"
-        DOMAIN_JOIN_PASS="$(echo ${USERINPUT} | cut -d '|' -f 1)"
-        WIFI_PASS="$(echo ${USERINPUT} | cut -d '|' -f 2)"
-        if [[ -z ${DOMAIN_JOIN_PASS} ]]; then
-          yad --title 'Potos Linux Client Setup' \
-            --borders 20 --center \
-            --button gtk-ok \
-            --image-on-top --image=/setup/potos.png \
-          --text 'Please enter the domain join password!'
-        fi
-        if [[ -z ${WIFI_PASS} ]]; then
-          yad --title 'Potos Linux Client Setup' \
-            --borders 20 --center \
-            --button gtk-ok \
-            --image-on-top --image=/setup/potos.png \
-            --text 'Please enter the Wi-Fi password!'
-        fi
-      done
-      echo $DOMAIN_JOIN_PASS
-      echo $WIFI_PASS
-  register: potos_firstboot_credentials
-  when: potos_firstboot_ask_credentials.enable is defined and potos_firstboot_ask_credentials.enable
-
-- name: Check hostname script
-  ansible.builtin.stat:
-    path: '{{ potos_firstboot_hostname_script }}'
-  register: potos_firstboot_hostname_script_check
-
-- name: Get hostname
-  ansible.builtin.shell:
-    cmd: '{{ potos_firstboot_hostname_script }}'
-  register: potos_firstboot_hostname_script_out
-  when: potos_firstboot_hostname_script_check.stat.exists
-
-- name: Set hostname fact
-  ansible.builtin.set_fact:
-    potos_firstboot_hostname: '{{ potos_firstboot_hostname_script_out.stdout }}'
-  when:
-    - potos_firstboot_hostname_script_check.stat.exists
-    - potos_firstboot_hostname_script_check.rc == 0
-
-- name: Ask for hostname
-  ansible.builtin.shell:
-    executable: '/bin/bash'
-    cmd: |
-      while [[ -z ${HOSTNAME} ]]; do
-        USERINPUT='$(yad --title "Hostname" \
-          --borders 20 --center --button gtk-ok \
-          --form --field "Hostname:"
-        )'
-        HOSTNAME='${echo ${USERINPUT} | cut -d "|" -f 1}}'
-      done
-      echo $HOSTNAME
-  register: potos_firstboot_hostname_dialog
-  when: not potos_firstboot_hostname is defined
-
-- name: Set hostname from dialog
-  ansible.builtin.set_fact:
-    potos_firstbook_hostname: '{{ potos_firstboot_hostname_dialog.stdout }}'
-  when: not potos_firstboot_hostname is defined
-
-- name: Set hostname
-  ansible.builtin.hostname:
-    name: '{{ potos_firstboot_hostname }}'
-  when: potos_firstboot_hostname is defined
-
-- name: Adjust hosts file
-  ansible.builtin.replace:
-    path: '/etc/hosts'
-    regexp: 'potos'
-    replace: '{{ potos_firstboot_hostname }}'
-  when: potos_firstboot_hostname is defined
-
-- name: Update grub config
-  ansible.builtin.replace:
-    path: '/etc/default/grub'
-    regexp: 'GRUB_CMDLINE_LINUX_DEFAULT=.*'
-    replace: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"'
-  tags:
-    - 'molecule-notest'
-
-- name: Write grub entries
-  ansible.builtin.copy:
-    path: '/etc/grub.d/40_custom'
-    content: 'menuentry {{ potos_firstboot_hostname }} { \n echo {{ potos_firstboot_hostname }} \n}'
-  when: potos_firstboot_hostname is defined
-
-- name: Update grub
-  ansible.builtin.shell:
-    cmd: '/usr/sbin/update-grub'
-  tags:
-    - 'molecule-notest'
-
-- name: Post commands
-  ansible.builtin.shell:
-    cmd: '{{ item }}'
-  loop: '{{ potos_firstboot_postcommands }}'
-  when:
-   - potos_firstboot_postcommands is defined
-   - potos_firstboot_postcommands is iterable
-   - potos_firstboot_postcommands is not string
-   - potos_firstboot_postcommands is not mapping
