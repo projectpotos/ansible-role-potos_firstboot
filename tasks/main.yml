@@ -22,3 +22,30 @@
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: yad --text 'Demo YAD Window that must open during installation'  --button=gtk-close
+
+
+- name: Ask hostname
+  ansible.builtin.shell:
+    executable: '/bin/bash'
+    cmd: |
+      while [[ -z ${POTOS_HOSTNAME} ]]; do
+        USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Hostname' \
+        --borders 20 --align center \
+        --button gtk-ok \
+        --image-on-top --image=/potos-setup/potos.png \
+        --text \
+      "Please enter your hostname below
+      " \
+        --form \
+        --field 'Hostname' \
+      )"
+
+      POTOS_HOSTNAME="$(echo ${USERINPUT} | cut -d '|' -f 1)"
+
+      if [[ -z ${POTOS_HOSTNAME} ]]; then
+        yad --title "${POTOS_CLIENT_NAME} HOSTNAME" \
+          --borders 20 --align center --button gtk-ok --image-on-top \
+          --image=/potos-setup/potos.png \
+          --text 'Please choose the hostname.'
+      fi
+      done
