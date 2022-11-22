@@ -17,17 +17,8 @@
 - name: Install yad
   ansible.builtin.package:
     name: 'yad'
-
-- name: Ask for hostname
+    
+- name: Yad test
   ansible.builtin.shell:
     executable: '/bin/bash'
-    cmd: |
-      while [[ -z ${POTOS_HOSTNAME} ]]; do
-        USERINPUT='$(yad --title "Hostname" \
-          --borders 20 --center --button gtk-ok \
-          --form --field "Hostname:"
-        )'
-        HOSTNAME='${echo ${USERINPUT} | cut -d "|" -f 1}}'
-      done
-      echo $POTOS_HOSTNAME
-  register: potos_firstboot_hostname_dialog
+    cmd: yad --text 'Demo YAD Window that must open during installation'  --button=gtk-close
