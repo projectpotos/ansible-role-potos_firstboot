@@ -49,3 +49,4 @@
           --text 'Please choose the hostname.'
       fi
       done
+  when: potos_firstboot_ask_hostname == True
