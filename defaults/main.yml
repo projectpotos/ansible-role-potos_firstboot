@@ -16,4 +16,4 @@ potos_firstboot_ask_keyboardlayout: true
 potos_firstboot_ask_select_keyboardlayout: 'Please select a keyboard layout'
 
 # Ask Hostname in an extra popup
-potos_firstboot_ask_hostname: true
+potos_firstboot_ask_hostname: false
