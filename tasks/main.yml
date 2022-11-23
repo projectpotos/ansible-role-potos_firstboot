@@ -1,3 +1,4 @@
+---
 - name: Prepare setup directory
   ansible.builtin.file:
     path: '/setup'
@@ -8,20 +9,25 @@
   ansible.builtin.shell:
     cmd: '{{ item }}'
   loop: '{{ potos_firstboot_precommands }}'
-  when: 
-   - potos_firstboot_precommands is defined
-   - potos_firstboot_precommands is iterable
-   - potos_firstboot_precommands is not string
-   - potos_firstboot_precommands is not mapping
+  when:
+    - potos_firstboot_precommands is defined
+    - potos_firstboot_precommands is iterable
+    - potos_firstboot_precommands is not string
+    - potos_firstboot_precommands is not mapping
 
 - name: Install yad
   ansible.builtin.package:
     name: 'yad'
-    
+
 - name: Yad test
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: yad --text 'Demo YAD Window that must open during installation'  --button=gtk-close
+
+- name: Save old hostname
+  ansible.builtin.command:
+    cmd: hostname
+  register: potos_firstboot_old_hostname
 
 - name: Ask hostname
   ansible.builtin.shell:
@@ -65,8 +71,9 @@
 - name: Adjust hosts file
   ansible.builtin.replace:
     path: '/etc/hosts'
-    regexp: 'potos'
+    regexp: '{{ potos_firstboot_old_hostname.stdout }}'
     replace: '{{ potos_firstboot_hostname }}'
-  when: potos_firstboot_hostname is defined and potos_firstboot_ask_hostname == True
-
-  
+  when:
+    - potos_firstboot_hostname is defined
+    - potos_firstboot_old_hostname.stdout != ''
+    - potos_firstboot_ask_hostname == True

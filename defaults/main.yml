@@ -1,5 +1,4 @@
 ---
-
 # Custom commands to execute before the first boot role
 potos_firstboot_precommands: []
 
