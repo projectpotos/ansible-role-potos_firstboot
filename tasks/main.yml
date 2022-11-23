@@ -23,7 +23,6 @@
     executable: '/bin/bash'
     cmd: yad --text 'Demo YAD Window that must open during installation'  --button=gtk-close
 
-
 - name: Ask hostname
   ansible.builtin.shell:
     executable: '/bin/bash'
@@ -49,4 +48,25 @@
           --text 'Please choose the hostname.'
       fi
       done
+      echo $POTOS_HOSTNAME
+  register: potos_firstboot_hostname_dialog
   when: potos_firstboot_ask_hostname == True
+
+- name: Set hostname from dialog as an ansible fact
+  ansible.builtin.set_fact:
+    potos_firstboot_hostname: '{{ potos_firstboot_hostname_dialog.stdout }}'
+  when: potos_firstboot_hostname is undefined and potos_firstboot_ask_hostname == True
+
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: '{{ potos_firstboot_hostname }}'
+  when: potos_firstboot_hostname is defined and potos_firstboot_ask_hostname == True
+
+- name: Adjust hosts file
+  ansible.builtin.replace:
+    path: '/etc/hosts'
+    regexp: 'potos'
+    replace: '{{ potos_firstboot_hostname }}'
+  when: potos_firstboot_hostname is defined and potos_firstboot_ask_hostname == True
+
+  
