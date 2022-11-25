@@ -138,7 +138,7 @@
   ansible.builtin.command: echo ${POTOS_INITIAL_USERNAME}
   register: potos_firstboot_initial_username
 
-- name: Add local user without sudo permission
+- name: Delete initial local user from env
   ansible.builtin.user:
     name: "{{ potos_firstboot_initial_username.stdout }}"
     remove: true
