@@ -124,12 +124,14 @@
     name: "{{ potos_new_user_password.stdout_lines[0] }}"
     password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
     groups: sudo
+    shell: "{{ potos_firstboot_local_user_add_shell }}"
   when: potos_firstboot_local_user_add_with_sudo == True
 
 - name: Add local user without sudo permission
   ansible.builtin.user:
     name: "{{ potos_new_user_password.stdout_lines[0] }}"
     password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
+    shell: "{{ potos_firstboot_local_user_add_shell }}"
   when: potos_firstboot_local_user_add_without_sudo == True
 
 # was ok, no debug needed anymore. schroeffu 20221125 1606

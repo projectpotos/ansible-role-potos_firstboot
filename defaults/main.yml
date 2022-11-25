@@ -22,6 +22,8 @@ potos_firstboot_ask_hostname: true
 potos_firstboot_local_user_add_with_sudo: true
 # Ask to create local user, without sudo (admin) rights.
 potos_firstboot_local_user_add_without_sudo: false
+# Define its shell, default is /bin/bash
+potos_firstboot_local_user_add_shell: /bin/bash
 
 # Not implemented yet:
 ## .iso Image Admin User Handling
