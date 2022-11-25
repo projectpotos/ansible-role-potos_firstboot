@@ -43,7 +43,7 @@
     - name: set keyboard layout
       ansible.builtin.replace:
         path: '/etc/default/keyboard'
-        regexp: 'XKBLAYOUT="\w*"'
+        regexp: 'XKBLAYOUT=.*'
         replace: 'XKBLAYOUT="{{ potos_firstboot_keyboard_layout.stdout }}"'
       when: potos_firstboot_default_keyboard_stat.stat.exists
 
