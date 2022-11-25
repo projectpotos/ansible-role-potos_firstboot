@@ -12,7 +12,7 @@ potos_firstboot_hostname_script: ''
 potos_firstboot_ask_keyboardlayout: true
 
 # Sentence to ask user to select a keyboard layout
-potos_firstboot_ask_select_keyboardlayout: 'Please select a keyboard layout'
+potos_firstboot_ask_select_keyboardlayout: 'Please select your keyboard layout'
 
 # Ask Hostname in an extra popup
 potos_firstboot_ask_hostname: true
@@ -29,6 +29,9 @@ potos_firstboot_local_user_add_shell: /bin/bash
 # Delete admin user from .iso install file.
 # Do not delete this admin user, if above no new sudo permissioned user is created ;-)
 potos_firstboot_initial_user_delete_admin_iso_user: true
+
+# Ask change disk encryption password
+potos_firstboot_ask_change_disk_enc_pw: true
 
 # Not implemented yet:
 potos_firstboot_initial_user_change_password: false
