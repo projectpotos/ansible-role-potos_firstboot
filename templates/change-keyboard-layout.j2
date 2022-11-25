@@ -19,3 +19,4 @@ else
   echo "$(echo ${KEYBOARD_LAYOUT} | tr -d '|')"
 fi
 
+gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${KEYBOARD_LAYOUT}')]" &> /dev/null
