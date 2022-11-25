@@ -37,7 +37,7 @@
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Hostname' \
         --borders 20 --align center \
         --button gtk-ok \
-        --image-on-top --image=/potos-setup/potos.png \
+        --image-on-top --image=/setup/potos.png \
         --text \
       "Please enter your hostname below
       " \
@@ -77,3 +77,66 @@
     - potos_firstboot_hostname is defined
     - potos_firstboot_old_hostname.stdout != ''
     - potos_firstboot_ask_hostname == True
+
+- name: Ask new user
+  ansible.builtin.shell:
+    executable: '/bin/bash'
+    cmd: |
+      while [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} || -z ${POTOS_NEW_PASS2} ]]; do
+        USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
+          --borders 20 --align center \
+          --button gtk-ok --button "Change keyboard layout":"/setup/change-keyboard-layout" \
+          --image-on-top --image=/setup/potos.png \
+          --text \
+      "IMPORTANT: If your password contains special characters, please remember to select the appropriate keyboard layout first.
+
+      Please enter your new credentials below
+      " \
+          --form \
+          --field 'Username' \
+          --field 'Password:H' \
+          --field 'Confirm password:H'
+        )"
+
+        POTOS_NEW_USER="$(echo ${USERINPUT} | cut -d '|' -f 1)"
+        POTOS_NEW_PASS="$(echo ${USERINPUT} | cut -d '|' -f 2)"
+        POTOS_NEW_PASS2="$(echo ${USERINPUT} | cut -d '|' -f 3)"
+
+        if [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} ]]; then
+          yad --title "${POTOS_CLIENT_NAME} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/potos.png \
+            --text 'Please choose and enter your new credentials.'
+        fi
+        if [[  ${POTOS_NEW_PASS} != ${POTOS_NEW_PASS2} ]]; then
+          yad --title "${POTOS_CLIENT_NAME} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/potos.png \
+            --text 'Your password was not identical. Please try again.'
+        fi
+      done
+      echo $POTOS_NEW_USER
+      echo $POTOS_NEW_PASS
+  register: potos_new_user_password
+
+- name: Add local user with sudo permission
+  ansible.builtin.user:
+    name: "{{ potos_new_user_password.stdout_lines[0] }}"
+    password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
+    groups: sudo
+    shell: "{{ potos_firstboot_local_user_add_shell }}"
+  when: potos_firstboot_local_user_add_with_sudo == True
+
+- name: Add local user without sudo permission
+  ansible.builtin.user:
+    name: "{{ potos_new_user_password.stdout_lines[0] }}"
+    password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
+    shell: "{{ potos_firstboot_local_user_add_shell }}"
+  when: potos_firstboot_local_user_add_without_sudo == True
+
+# was ok, no debug needed anymore. schroeffu 20221125 1606
+#- name: tmp msg output
+#  ansible.builtin.debug:
+#    msg: pwdline wrong? register is {{ potos_new_user_password }} and lines {{ potos_new_user_password.stdout_lines }} and lines1 is {{ potos_new_user_password.stdout_lines[1] }} and hashed it is {{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}
+#  when: potos_new_user_password is defined
+
