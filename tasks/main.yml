@@ -90,7 +90,7 @@
           --text \
       "IMPORTANT: If your password contains special characters, please remember to select the appropriate keyboard layout first.
 
-      Please enter your new credentials below 
+      Please enter your new credentials below
       " \
           --form \
           --field 'Username' \
@@ -113,5 +113,5 @@
 
 - name: Add local user
   ansible.builtin.user:
-    name: "{{ potos_new_user_password.stdout_lines[1] }}"
-    password: "{{ potos_new_user_password.stdout_lines[2] | password_hash('sha512') }}"
+    name: "{{ potos_new_user_password.stdout_lines[0] }}"
+    password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"

@@ -18,7 +18,7 @@ potos_firstboot_ask_select_keyboardlayout: 'Please select a keyboard layout'
 potos_firstboot_ask_hostname: true
 
 # to implement in playbook:
-potos_firstboot_initial_user_change_password: false 
+potos_firstboot_initial_user_change_password: false
 potos_firstboot_initial_user_delete_admin_iso_user: false
 potos_firstboot_local_user_add: true
 potos_firstboot_local_user_with_sudo_permission: true
