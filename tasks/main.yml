@@ -122,7 +122,7 @@
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: |
-      while [[ -z ${POTOS_NEW_USER} ]] && [[ ${POTOS_NEW_PASS} != ${POTOS_NEW_PASS2} ]]; do
+      while [ ${POTOS_NEW_PASS} != ${POTOS_NEW_PASS2} -o -z ${POTOS_NEW_USER} ]; do
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
           --borders 20 --align center \
           --button gtk-ok \
@@ -223,7 +223,7 @@
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: |
-      while [[ ${POTOS_NEW_LUKS_PW} != ${POTOS_NEW_LUKS_PW2} ]]; do
+      while [ ${POTOS_NEW_LUKS_PW} != ${POTOS_NEW_LUKS_PW2} -o -z ${POTOS_NEW_LUKS_PW2} ]; do
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
           --borders 20 --align center \
           --button gtk-ok \
