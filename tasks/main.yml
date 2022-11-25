@@ -265,7 +265,7 @@
   register: potos_old_luks_password
 
 - name: Change boot disk encryption luks password now
-  ansible.builtin.command:
+  ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: |
       eval "$(awk '/crypt/ {print $2}' /etc/crypttab)" && LUKS_DEVICE="$(realpath "/dev/disk/by-uuid/${UUID}")"
