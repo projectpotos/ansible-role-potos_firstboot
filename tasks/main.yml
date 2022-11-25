@@ -223,7 +223,7 @@
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: |
-      while [[ -z ${POTOS_NEW_LUKS_PW} ]]; do
+      while [[ -z ${POTOS_NEW_LUKS_PW} || -z ${POTOS_NEW_LUKS_PW2} ]]; do
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
           --borders 20 --align center \
           --button gtk-ok \
