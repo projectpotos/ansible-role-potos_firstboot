@@ -13,8 +13,9 @@ KEYBOARD_LAYOUT="$(yad --width 600 --height 600 --list --column 'Keyboard Layout
   --image /usr/share/icons/Adwaita/48x48/apps/accessories-character-map-symbolic.symbolic.png \
   --text '{{ potos_firstboot_ask_select_keyboardlayout | default("Please select a keyboard layout") }}')"
 
-if [[ -z "${KEYBOARD_LAYOUT}" ]];
+if [[ -z "${KEYBOARD_LAYOUT}" ]]; then
   echo "us"
-then
+else
   echo "$(echo ${KEYBOARD_LAYOUT} | tr -d '|')"
 fi
+
