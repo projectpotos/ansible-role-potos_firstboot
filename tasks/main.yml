@@ -29,37 +29,37 @@
         owner: root
         group: root
 
-     - name: ask dialog
-       ansible.builtin.shell:
-         cmd: '/setup/change-keyboard-layout.sh'
-       register: potos_firstboot_keyboard_layout
-       changed_when: false
+    - name: ask dialog
+      ansible.builtin.shell:
+        cmd: '/setup/change-keyboard-layout.sh'
+      register: potos_firstboot_keyboard_layout
+      changed_when: false
 
-     - name: check if keyboard file exists
-       ansible.builtin.stat:
-         path: '/etc/default/keyboard'
-       register: potos_firstboot_default_keyboard_stat
+    - name: check if keyboard file exists
+      ansible.builtin.stat:
+        path: '/etc/default/keyboard'
+      register: potos_firstboot_default_keyboard_stat
 
-     - name: set keyboard layout
-       ansible.builtin.replace:
-         path: '/etc/default/keyboard'
-         regexp: 'XKBLAYOUT="\w*"'
-         replace: 'XKBLAYOUT="{{ potos_firstboot_keyboard_layout.stdout }}"'
-       when: potos_firstboot_default_keyboard_stat.stat.exists
+    - name: set keyboard layout
+      ansible.builtin.replace:
+        path: '/etc/default/keyboard'
+        regexp: 'XKBLAYOUT="\w*"'
+        replace: 'XKBLAYOUT="{{ potos_firstboot_keyboard_layout.stdout }}"'
+      when: potos_firstboot_default_keyboard_stat.stat.exists
 
-     - name: check if gsettings is installed
-       ansible.builtin.shell:
-         cmd: 'gsettings help'
-       failed_when: false
-       changed_when: false
-       register: potos_firstboot_gsettings_exists
+    - name: check if gsettings is installed
+      ansible.builtin.shell:
+        cmd: 'gsettings help'
+      failed_when: false
+      changed_when: false
+      register: potos_firstboot_gsettings_exists
 
-     - name: set keyboard layout in gnome
-       ansible.builtin.shell:
-         cmd: "gsettings set org.gnome.desktop.input-sources sources '[(\"xkb\", \"{{ potos_firstboot_keyboard_layout.stdout }}\")]'"
-       changed_when: false
-       when: potos_firstboot_gsettings_exists.rc == 0
-   when: potos_firstboot_ask_keyboardlayout
+    - name: set keyboard layout in gnome
+      ansible.builtin.shell:
+        cmd: "gsettings set org.gnome.desktop.input-sources sources '[(\"xkb\", \"{{ potos_firstboot_keyboard_layout.stdout }}\")]'"
+      changed_when: false
+      when: potos_firstboot_gsettings_exists.rc == 0
+  when: potos_firstboot_ask_keyboardlayout
 
 - name: Save old hostname
   ansible.builtin.command:
