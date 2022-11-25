@@ -21,6 +21,6 @@ KEYBOARD_LAYOUT=$(echo ${KEYBOARD_LAYOUT} | tr -d '|')
 #   echo "$(echo ${KEYBOARD_LAYOUT} | tr -d '|')"
 # fi
 
-sudo /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${KEYBOARD_LAYOUT}')]" &>/tmp/gsettings_xkb
+/usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${KEYBOARD_LAYOUT}')]" &>/tmp/gsettings_xkb
 
 echo "${KEYBOARD_LAYOUT}"
