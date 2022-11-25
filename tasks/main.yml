@@ -114,5 +114,4 @@
 - name: Add local user
   ansible.builtin.user:
     name: "{{ potos_new_user_password.stdout_lines[1] }}"
-    password: "{{ potos_new_user_password.stdout_lines[2] | password_hash('sha512') }}
-
+    password: "{{ potos_new_user_password.stdout_lines[2] | password_hash('sha512') }}"
