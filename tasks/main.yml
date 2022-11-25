@@ -122,7 +122,7 @@
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: |
-      while [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} || -z ${POTOS_NEW_PASS2} ]]; do
+      while [[ -z ${POTOS_NEW_USER} && ${POTOS_NEW_PASS} != ${POTOS_NEW_PASS2} ]]; do
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
           --borders 20 --align center \
           --button gtk-ok \
@@ -223,7 +223,7 @@
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: |
-      while [[ -z ${POTOS_NEW_LUKS_PW} || -z ${POTOS_NEW_LUKS_PW2} ]]; do
+      while [[ ${POTOS_NEW_LUKS_PW} != ${POTOS_NEW_LUKS_PW2} ]]; do
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
           --borders 20 --align center \
           --button gtk-ok \
@@ -269,7 +269,7 @@
     executable: '/bin/bash'
     cmd: |
       eval "$(awk '/crypt/ {print $2}' /etc/crypttab)" && LUKS_DEVICE="$(realpath "/dev/disk/by-uuid/${UUID}")"
-      printf '%s\n' '{{ potos_old_luks_password.stdout }} ' "{{ potos_new_luks_password.stdout }}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
+      printf '%s\n' '{{ potos_old_luks_password.stdout }}' "{{ potos_new_luks_password.stdout }}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
       if [[ $? -ne 0 ]]; then
         echo "# Failed to change primary disk encryption key"
         exit 1
