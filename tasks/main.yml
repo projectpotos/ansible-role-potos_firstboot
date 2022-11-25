@@ -94,7 +94,7 @@
       " \
           --form \
           --field 'Username' \
-          --field 'Password:H'
+          --field 'Password:H' \
           --field 'Confirm password:H'
         )"
 
