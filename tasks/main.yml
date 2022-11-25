@@ -269,7 +269,7 @@
     executable: '/bin/bash'
     cmd: |
       eval "$(awk '/crypt/ {print $2}' /etc/crypttab)" && LUKS_DEVICE="$(realpath "/dev/disk/by-uuid/${UUID}")"
-      printf '%s\n' 'install' "{{ potos_old_luks_password.stdout }}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
+      printf '%s\n' '{{ potos_old_luks_password.stdout }} ' "{{ potos_new_luks_password.stdout }}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
       if [[ $? -ne 0 ]]; then
         echo "# Failed to change primary disk encryption key"
         exit 1
