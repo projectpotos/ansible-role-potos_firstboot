@@ -10,7 +10,7 @@ done)
 KEYBOARD_LAYOUT="$(yad --width 600 --height 600 --list --column 'Keyboard Layout' \
   --column '' ${ALLCOLS} \
   --print-column 1 --button gtk-ok \
-  --image /usr/share/icons/Adwaita/48x48/apps/preferences-desktop-keyboard-symbolic.symbolic.png \
+  --image /usr/share/icons/Adwaita/48x48/apps/accessories-character-map-symbolic.symbolic.png \
   --text '{{ potos_firstboot_ask_select_keyboardlayout | default("Please select a keyboard layout") }}')"
 
 if [[ -z "${KEYBOARD_LAYOUT}" ]];
