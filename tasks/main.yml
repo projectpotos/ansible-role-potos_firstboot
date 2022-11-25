@@ -37,7 +37,7 @@
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Hostname' \
         --borders 20 --align center \
         --button gtk-ok \
-        --image-on-top --image=/potos-setup/potos.png \
+        --image-on-top --image=/setup/potos.png \
         --text \
       "Please enter your hostname below
       " \
@@ -77,3 +77,44 @@
     - potos_firstboot_hostname is defined
     - potos_firstboot_old_hostname.stdout != ''
     - potos_firstboot_ask_hostname == True
+
+- name: Ask new user
+  ansible.builtin.shell:
+    executable: '/bin/bash'
+    cmd: |
+      while [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} ]]; do
+        USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
+          --borders 20 --align center \
+          --button gtk-ok --button "Change keyboard layout":"/setup/change-keyboard-layout" \
+          --image-on-top --image=/setup/potos.png \
+          --text \
+      "IMPORTANT: If your password contains special characters, please remember to select the appropriate keyboard layout first.
+
+      Please enter your new credentials below 
+      " \
+          --form \
+          --field 'Username' \
+          --field 'Password:H'
+        )"
+
+        POTOS_NEW_USER="$(echo ${USERINPUT} | cut -d '|' -f 1)"
+        POTOS_NEW_PASS="$(echo ${USERINPUT} | cut -d '|' -f 2)"
+
+        if [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} ]]; then
+          yad --title "${POTOS_CLIENT_NAME} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/potos.png \
+            --text 'Please choose and enter your new credentials.'
+        fi
+      done
+      echo $POTOS_NEW_USER
+      echo $POTOS_NEW_PASS
+  register: potos_new_user_password
+
+- name: Add local user
+  ansible.builtin.user:
+    name: {{ potos_new_user_password.stdout_lines[1] }}
+    password: {{ potos_new_user_password.stdout_lines[2] | password_hash('sha512') }}
+    #comment: {{ potos_firstboot_local_user_add_comment_yad.stdout_lines[:3] }}
+    #group: sudo
+
