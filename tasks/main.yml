@@ -43,7 +43,7 @@
     - name: set keyboard layout
       ansible.builtin.replace:
         path: '/etc/default/keyboard'
-        regexp: 'XKBLAYOUT="\w*"'
+        regexp: 'XKBLAYOUT=.*'
         replace: 'XKBLAYOUT="{{ potos_firstboot_keyboard_layout.stdout }}"'
       when: potos_firstboot_default_keyboard_stat.stat.exists
 
@@ -56,7 +56,8 @@
 
     - name: set keyboard layout in gnome
       ansible.builtin.shell:
-        cmd: "gsettings set org.gnome.desktop.input-sources sources '[(\"xkb\", \"{{ potos_firstboot_keyboard_layout.stdout }}\")]'"
+        executable: '/bin/bash'
+        cmd: rm -rf ~/.cache/dconf && rm -rf ~/.dbus && gsettings set org.gnome.desktop.input-sources sources '[("xkb", "{{ potos_firstboot_keyboard_layout.stdout }}")]'
       changed_when: false
       when: potos_firstboot_gsettings_exists.rc == 0
   when: potos_firstboot_ask_keyboardlayout
@@ -122,7 +123,7 @@
       while [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} || -z ${POTOS_NEW_PASS2} ]]; do
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
           --borders 20 --align center \
-          --button gtk-ok --button "Change keyboard layout":"/setup/change-keyboard-layout" \
+          --button gtk-ok --button "Change keyboard layout":"/setup/change-keyboard-layout.sh" \
           --image-on-top --image=/setup/potos.png \
           --text \
       "IMPORTANT: If your password contains special characters, please remember to select the appropriate keyboard layout first.

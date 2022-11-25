@@ -13,8 +13,14 @@ KEYBOARD_LAYOUT="$(yad --width 600 --height 600 --list --column 'Keyboard Layout
   --image /usr/share/icons/Adwaita/48x48/apps/accessories-character-map-symbolic.symbolic.png \
   --text '{{ potos_firstboot_ask_select_keyboardlayout | default("Please select a keyboard layout") }}')"
 
-if [[ -z "${KEYBOARD_LAYOUT}" ]];
-  echo "us"
-then
-  echo "$(echo ${KEYBOARD_LAYOUT} | tr -d '|')"
-fi
+KEYBOARD_LAYOUT=$(echo ${KEYBOARD_LAYOUT} | tr -d '|')
+
+# if [[ -z "${KEYBOARD_LAYOUT}" ]]; then
+#   echo "us"
+# else
+#   echo "$(echo ${KEYBOARD_LAYOUT} | tr -d '|')"
+# fi
+
+rm -rf ~/.cache/dconf && rm -rf ~/.dbus && /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${KEYBOARD_LAYOUT}')]" &>/tmp/gsettings_xkb
+
+echo "${KEYBOARD_LAYOUT}"
