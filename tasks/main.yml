@@ -56,7 +56,7 @@
 
     - name: set keyboard layout in gnome
       ansible.builtin.shell:
-        cmd: "gsettings set org.gnome.desktop.input-sources sources '[("xkb", "{{ potos_firstboot_keyboard_layout.stdout }}")]'"
+        cmd: gsettings set org.gnome.desktop.input-sources sources '[("xkb", "{{ potos_firstboot_keyboard_layout.stdout }}")]'
       changed_when: false
       when: potos_firstboot_gsettings_exists.rc == 0
   when: potos_firstboot_ask_keyboardlayout
