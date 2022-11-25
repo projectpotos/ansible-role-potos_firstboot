@@ -219,6 +219,62 @@
 #   tags:
 #     - 'molecule-notest'
 
+- name: Ask new disk encryption password
+  ansible.builtin.shell:
+    executable: '/bin/bash'
+    cmd: |
+      while [[ -z ${POTOS_NEW_LUKS_PW} ]]; do
+        USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
+          --borders 20 --align center \
+          --button gtk-ok \
+          --button "Change keyboard layout":"/setup/change-keyboard-layout.sh" \
+          --image-on-top --image=/setup/potos.png \
+          --text \
+      "Your disk encryption password needs to be changed now, because the default password is unsecure.
+
+      IMPORTANT: Do not forget your disk encryption boot password! Please note your disk encryption boot password on a very safe plase.
+
+      Please enter your new disk encryption password below
+      " \
+          --form \
+          --field 'Password:H' \
+          --field 'Confirm password:H'
+        )"
+
+        POTOS_NEW_LUKS_PW="$(echo ${USERINPUT} | cut -d '|' -f 1)"
+        POTOS_NEW_LUKS_PW2="$(echo ${USERINPUT} | cut -d '|' -f 2)"
+
+        if [[ -z ${POTOS_NEW_LUKS_PW} ]]; then
+          yad --title "${POTOS_CLIENT_NAME} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/potos.png \
+            --text 'Please choose and enter your new credentials.'
+        fi
+        if [[  ${POTOS_NEW_LUKS_PW} != ${POTOS_NEW_LUKS_PW2} ]]; then
+          yad --title "${POTOS_CLIENT_NAME} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/potos.png \
+            --text 'Your password was not identical. Please try again.'
+        fi
+      done
+      echo $POTOS_NEW_LUKS_PW
+  register: potos_new_luks_password
+
+- name: Print old luks pw from env
+  ansible.builtin.shell: . /setup/.env && echo ${POTOS_DISK_ENCRYPTION_INITIAL_PASSWORD}
+  register: potos_old_luks_password
+
+- name: Change boot disk encryption luks password now
+  ansible.builtin.command:
+    executable: '/bin/bash'
+    cmd: |
+      eval "$(awk '/crypt/ {print $2}' /etc/crypttab)" && LUKS_DEVICE="$(realpath "/dev/disk/by-uuid/${UUID}")"
+      printf '%s\n' 'install' "{{ potos_old_luks_password.stdout }}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
+      if [[ $? -ne 0 ]]; then
+        echo "# Failed to change primary disk encryption key"
+        exit 1
+      fi
+
 - name: Post commands
   ansible.builtin.shell:
     cmd: '{{ item }}'
