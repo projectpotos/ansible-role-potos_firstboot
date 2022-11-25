@@ -82,7 +82,7 @@
   ansible.builtin.shell:
     executable: '/bin/bash'
     cmd: |
-      while [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} ]]; do
+      while [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} || -z ${POTOS_NEW_PASS2} ]]; do
         USERINPUT="$(yad --fullscreen --title '${POTOS_CLIENT_NAME} Setup' \
           --borders 20 --align center \
           --button gtk-ok --button "Change keyboard layout":"/setup/change-keyboard-layout" \
@@ -108,7 +108,7 @@
             --image=/setup/potos.png \
             --text 'Please choose and enter your new credentials.'
         fi
-        if [[  ${POTOS_NEW_PASS} != ${POTOS_NEW_PASS_2} ]]; then
+        if [[  ${POTOS_NEW_PASS} != ${POTOS_NEW_PASS2} ]]; then
           yad --title "${POTOS_CLIENT_NAME} Setup" \
             --borders 20 --align center --button gtk-ok --image-on-top \
             --image=/setup/potos.png \
