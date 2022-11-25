@@ -115,3 +115,8 @@
   ansible.builtin.user:
     name: "{{ potos_new_user_password.stdout_lines[0] }}"
     password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
+
+- name: tmp msg output
+  ansible.builtin.debug:
+    msg: pwdline wrong? register is {{ potos_new_user_password }} and lines {{ potos_new_user_password.stdout_lines }} and lines1 is {{ potos_new_user_password.stdout_lines[1] }} and hashed it is {{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}
+  when: potos_new_user_password is defined
