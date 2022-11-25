@@ -113,8 +113,6 @@
 
 - name: Add local user
   ansible.builtin.user:
-    name: {{ potos_new_user_password.stdout_lines[1] }}
-    password: {{ potos_new_user_password.stdout_lines[2] | password_hash('sha512') }}
-    #comment: {{ potos_firstboot_local_user_add_comment_yad.stdout_lines[:3] }}
-    #group: sudo
+    name: "{{ potos_new_user_password.stdout_lines[1] }}"
+    password: "{{ potos_new_user_password.stdout_lines[2] | password_hash('sha512') }}
 
