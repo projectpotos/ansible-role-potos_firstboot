@@ -134,6 +134,17 @@
     shell: "{{ potos_firstboot_local_user_add_shell }}"
   when: potos_firstboot_local_user_add_without_sudo == True
 
+- name: Print username from .env
+  cmd: echo ${POTOS_INITIAL_USERNAME}
+  register: potos_firstboot_initial_username
+
+- name: Add local user without sudo permission
+  ansible.builtin.user:
+    name: "{{ potos_firstboot_initial_username.stdout }}"
+    remove: true
+  when: potos_firstboot_initial_user_delete_admin_iso_user == True
+  
+
 # was ok, no debug needed anymore. schroeffu 20221125 1606
 #- name: tmp msg output
 #  ansible.builtin.debug:

@@ -28,6 +28,7 @@ potos_firstboot_local_user_add_shell: /bin/bash
 # Not implemented yet:
 ## .iso Image Admin User Handling
 # Delete admin user from .iso install file.
+# Do not delete this admin user, if above no new sudo permissioned user is created ;-)
 potos_firstboot_initial_user_delete_admin_iso_user: true
 
 potos_firstboot_initial_user_change_password: false
