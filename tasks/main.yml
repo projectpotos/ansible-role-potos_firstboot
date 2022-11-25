@@ -19,15 +19,15 @@
   ansible.builtin.package:
     name: 'yad'
 
-# - name: Ask for keyboard layout
-#   block:
-#     - name: deploy script for keyboard layout selection
-#       ansible.builtin.template:
-#         src: 'change-keyboard-layout.j2'
-#         dest: '/setup/change-keyboard-layout'
-#         mode: '0755'
-#         owner: root
-#         group: root
+- name: Ask for keyboard layout
+  block:
+    - name: deploy script for keyboard layout selection
+      ansible.builtin.template:
+        src: 'change-keyboard-layout.j2'
+        dest: '/setup/change-keyboard-layout.sh'
+        mode: '0755'
+        owner: root
+        group: root
 
 #     - name: ask dialog
 #       ansible.builtin.shell:
