@@ -134,8 +134,8 @@
     shell: "{{ potos_firstboot_local_user_add_shell }}"
   when: potos_firstboot_local_user_add_without_sudo == True
 
-- name: Print username from .env
-  cmd: echo ${POTOS_INITIAL_USERNAME}
+- name: Print username from env
+  ansible.builtin.command: echo ${POTOS_INITIAL_USERNAME}
   register: potos_firstboot_initial_username
 
 - name: Add local user without sudo permission
