@@ -142,7 +142,7 @@
 - name: Delete initial local user from env
   ansible.builtin.user:
     name: "{{ potos_firstboot_initial_username.stdout }}"
-    remove: true
+    state: absent
   when: potos_firstboot_initial_user_delete_admin_iso_user == True
   
 
