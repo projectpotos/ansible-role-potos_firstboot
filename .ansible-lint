@@ -2,3 +2,8 @@
 
 skip_list:
   - name[casing]
+
+warn_list:
+  - command-instead-of-shell  # Use shell only when shell functionality is required.
+  - literal-compare  # Don't compare to literal True/False.
+  - no-changed-when  # Commands should not change things if nothing needs doing.
