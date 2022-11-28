@@ -5,6 +5,7 @@
   gather_facts: yes
   vars:
     runtype: 'firstboot'
+    potos_new_luks_password: 'dummylukspassword'
   tasks:
     - name: run role
       ansible.builtin.include_role:

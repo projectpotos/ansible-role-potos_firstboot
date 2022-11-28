@@ -17,3 +17,15 @@
     loop:
       - 'gnome-session'
       - 'gdm3'
+
+  - name: create setup directory
+    ansible.builtin.file:
+      dest: /setup
+      state: directory
+      mode: 0755
+
+  - name: download env
+    ansible.builtin.get_url:
+      url: https://raw.githubusercontent.com/projectpotos/potos-iso-builder/main/.env
+      dest: /setup/.env
+      mode: 0644

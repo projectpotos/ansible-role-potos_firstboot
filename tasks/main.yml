@@ -67,6 +67,7 @@
   ansible.builtin.command:
     cmd: hostname
   register: potos_firstboot_old_hostname
+  changed_when: false
 
 - name: Ask hostname
   ansible.builtin.shell:
@@ -97,11 +98,15 @@
       echo $POTOS_HOSTNAME
   register: potos_firstboot_hostname_dialog
   when: potos_firstboot_ask_hostname == True
+  tags:
+    - 'molecule-notest'
 
 - name: Set hostname from dialog as an ansible fact
   ansible.builtin.set_fact:
     potos_firstboot_hostname: '{{ potos_firstboot_hostname_dialog.stdout }}'
   when: potos_firstboot_hostname is undefined and potos_firstboot_ask_hostname == True
+  tags:
+    - 'molecule-notest'
 
 - name: Set hostname
   ansible.builtin.hostname:
@@ -159,6 +164,8 @@
       echo $POTOS_NEW_USER
       echo $POTOS_NEW_PASS
   register: potos_new_user_password
+  tags:
+    - 'molecule-notest'
 
 - name: Add local user with sudo permission
   ansible.builtin.user:
@@ -167,6 +174,8 @@
     groups: sudo
     shell: "{{ potos_firstboot_local_user_add_shell }}"
   when: potos_firstboot_local_user_add_with_sudo == True
+  tags:
+    - 'molecule-notest'
 
 - name: Add local user without sudo permission
   ansible.builtin.user:
@@ -174,11 +183,14 @@
     password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
     shell: "{{ potos_firstboot_local_user_add_shell }}"
   when: potos_firstboot_local_user_add_without_sudo == True
+  tags:
+    - 'molecule-notest'
 
 - name: Print username from env
   ansible.builtin.shell: . /setup/.env && echo ${POTOS_INITIAL_USERNAME}
   register: potos_firstboot_initial_username
   when: potos_firstboot_initial_user_delete_admin_iso_user == True
+  changed_when: false
 
 - name: Delete initial local user from env
   ansible.builtin.user:
@@ -260,11 +272,14 @@
       echo $POTOS_NEW_LUKS_PW
   register: potos_new_luks_password
   when: potos_firstboot_ask_change_disk_enc_pw
+  tags:
+    - 'molecule-notest'
 
 - name: Print old luks pw from env
   ansible.builtin.shell: . /setup/.env && echo ${POTOS_DISK_ENCRYPTION_INITIAL_PASSWORD}
   register: potos_old_luks_password
   when: potos_firstboot_ask_change_disk_enc_pw
+  changed_when: false
 
 - name: Change boot disk encryption luks password now
   ansible.builtin.shell:
@@ -277,6 +292,8 @@
         exit 1
       fi
   when: potos_firstboot_ask_change_disk_enc_pw
+  tags:
+    - 'molecule-notest'
 
 - name: Post commands
   ansible.builtin.shell:
