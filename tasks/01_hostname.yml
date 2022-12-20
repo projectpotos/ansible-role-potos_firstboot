@@ -1,0 +1,73 @@
+---
+
+- name: Save old hostname
+  ansible.builtin.command:
+    cmd: hostname
+  register: potos_firstboot_old_hostname
+  changed_when: false
+
+- name: Run hostname script
+  ansible.builtin.shell:
+    cmd: "{{ potos_firstboot_hostname_script }}"
+  changed_when: false
+  when: potos_firstboot_hostname_script != ''
+
+- name: Ask hostname
+  ansible.builtin.shell:
+    executable: '/bin/bash'
+    cmd: |
+      while [[ -z ${POTOS_HOSTNAME} ]]; do
+        USERINPUT="$(yad --fullscreen --title '{{ potos_firstboot_client_name }} Hostname' \
+        --borders 20 --align center \
+        --button gtk-ok \
+        --button "Change keyboard layout":"/setup/change-keyboard-layout.sh" \
+        --image-on-top --image=/setup/logo.png \
+        --text \
+      "Please enter your hostname below.
+      " \
+        --form \
+        --field 'Hostname' \
+      )"
+
+      POTOS_HOSTNAME="$(echo ${USERINPUT} | cut -d '|' -f 1)"
+
+      if [[ -z ${POTOS_HOSTNAME} ]]; then
+        yad --title "{{ potos_firstboot_client_name }} HOSTNAME" \
+          --borders 20 --align center --button gtk-ok --image-on-top \
+          --image=/setup/logo.png \
+          --text 'Please choose the hostname.'
+      fi
+      done
+      echo $POTOS_HOSTNAME
+  register: potos_firstboot_hostname_dialog
+  when:
+    - potos_firstboot_hostname is undefined
+    - potos_firstboot_ask_hostname
+  tags:
+    - 'molecule-notest'
+
+- name: Set hostname from dialog as an ansible fact
+  ansible.builtin.set_fact:
+    potos_firstboot_hostname: '{{ potos_firstboot_hostname_dialog.stdout }}'
+  when:
+    - potos_firstboot_hostname is undefined
+    - potos_firstboot_ask_hostname
+  tags:
+    - 'molecule-notest'
+
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: '{{ potos_firstboot_hostname }}'
+  when:
+    - potos_firstboot_hostname is defined
+    - potos_firstboot_ask_hostname
+
+- name: Adjust hosts file
+  ansible.builtin.replace:
+    path: '/etc/hosts'
+    regexp: '{{ potos_firstboot_old_hostname.stdout }}'
+    replace: '{{ potos_firstboot_hostname }}'
+  when:
+    - potos_firstboot_hostname is defined
+    - potos_firstboot_old_hostname.stdout != ''
+    - potos_firstboot_ask_hostname

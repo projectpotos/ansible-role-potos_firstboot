@@ -2,18 +2,69 @@
 
 argument_specs:
   main:
-    short_description: Role to use as template for new roles of Potos Linux Clients.
+    short_description: Role to run handle firstboot questions in Potos Linux Clients.
     options:
-      potos_template_example_var:
+      potos_firstboot_precommands:
         description:
-          - Example variable
-        type: str
-        required: no
-        default: 'hello world!'
-      potos_template_example_list:
-        description:
-          - List of items used for action xyz
+          - Custom commands to execute before the first boot role
         type: list
         elements: str
-        required: no
+        required: false
         default: []
+      potos_firstboot_postcommands:
+        description:
+          - Custom commands to execute after the first boot role
+        type: list
+        elements: str
+        required: false
+        default: []
+      potos_firstboot_hostname_script:
+        description:
+          - Script to be executed to determine hostname
+        type: str
+        required: false
+        default: ''
+      potos_firstboot_ask_hostname:
+        description:
+          - If the user should be asked for a hostname when not set before
+        type: bool
+        required: false
+        default: true
+      potos_firstboot_local_user_add_with_sudo:
+        description:
+          - Ask to create a new local user, sudo (admin) rights included
+        type: bool
+        required: false
+        default: true
+      potos_firstboot_local_user_add_without_sudo:
+        description:
+          - Ask to create a new local user, without sudo (admin) rights.
+        type: bool
+        required: false
+        default: false
+      potos_firstboot_local_user_add_shell:
+        description:
+          - Define the new user shell, we recommend /bin/bash
+        type: str
+        required: false
+        default: /bin/bash
+      potos_firstboot_initial_user_delete_admin_iso_user:
+        description:
+          - Delete admin user from .iso install file.
+          - Do not delete this admin user, if above no new sudo permissioned user is created ;-)
+        type: bool
+        required: false
+        default: true
+      potos_firstboot_ask_change_disk_enc_pw:
+        description:
+          - Ask change disk encryption password (if disk encryption is enabled in iso)
+        type: bool
+        required: false
+        default: true
+      potos_firstboot_client_name:
+        description:
+          - Clientname to be used
+          - Do NOT change if using with the Potos Playbook!
+        type: str
+        required: false
+        default: "{{ potos_plays_client_short_name | default('potos') }}"

@@ -1,0 +1,76 @@
+---
+- name: Check if disk encryption is enabled in iso
+  ansible.builtin.shell:
+    cmd: 'lsblk | grep crypt | wc -l'
+  register: potos_firstboot_is_crypt
+  changed_when: false
+
+- name: Ask new disk encryption password
+  ansible.builtin.shell:
+    executable: '/bin/bash'
+    cmd: |
+      while [ ${POTOS_NEW_LUKS_PW} != ${POTOS_NEW_LUKS_PW2} -o -z ${POTOS_NEW_LUKS_PW2} ]; do
+        USERINPUT="$(yad --fullscreen --title '{{ potos_firstboot_client_name }} Setup' \
+          --borders 20 --align center \
+          --button gtk-ok \
+          --button "Change keyboard layout":"/setup/change-keyboard-layout.sh" \
+          --image-on-top --image=/setup/potos.png \
+          --text \
+      "Your disk encryption password needs to be changed now, because the default password is unsecure.
+
+      IMPORTANT: Do not forget your disk encryption boot password! Please note your disk encryption boot password on a very safe plase.
+
+      Please enter your new disk encryption password below
+      " \
+          --form \
+          --field 'Password:H' \
+          --field 'Confirm password:H'
+        )"
+
+        POTOS_NEW_LUKS_PW="$(echo ${USERINPUT} | cut -d '|' -f 1)"
+        POTOS_NEW_LUKS_PW2="$(echo ${USERINPUT} | cut -d '|' -f 2)"
+
+        if [[ -z ${POTOS_NEW_LUKS_PW} ]]; then
+          yad --title "{{ potos_firstboot_client_name }} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/potos.png \
+            --text 'Please choose and enter your new credentials.'
+        fi
+        if [[  ${POTOS_NEW_LUKS_PW} != ${POTOS_NEW_LUKS_PW2} ]]; then
+          yad --title "{{ potos_firstboot_client_name }} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/potos.png \
+            --text 'Your password was not identical. Please try again.'
+        fi
+      done
+      echo $POTOS_NEW_LUKS_PW
+  register: potos_new_luks_password
+  when:
+    - potos_firstboot_ask_change_disk_enc_pw
+    - potos_firstboot_is_crypt.stdout != '0'
+  tags:
+    - 'molecule-notest'
+
+- name: Print old luks pw from env
+  ansible.builtin.shell: . /setup/.env && echo ${POTOS_DISK_ENCRYPTION_INITIAL_PASSWORD}
+  register: potos_old_luks_password
+  when:
+    - potos_firstboot_ask_change_disk_enc_pw
+    - potos_firstboot_is_crypt.stdout != '0'
+  changed_when: false
+
+- name: Change boot disk encryption luks password now
+  ansible.builtin.shell:
+    executable: '/bin/bash'
+    cmd: |
+      eval "$(awk '/crypt/ {print $2}' /etc/crypttab)" && LUKS_DEVICE="$(realpath "/dev/disk/by-uuid/${UUID}")"
+      printf '%s\n' '{{ potos_old_luks_password.stdout }}' "{{ potos_new_luks_password.stdout }}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
+      if [[ $? -ne 0 ]]; then
+        echo "# Failed to change primary disk encryption key"
+        exit 1
+      fi
+  when:
+    - potos_firstboot_ask_change_disk_enc_pw
+    - potos_firstboot_is_crypt.stdout != '0'
+  tags:
+    - 'molecule-notest'

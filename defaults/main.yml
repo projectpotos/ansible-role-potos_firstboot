@@ -33,6 +33,6 @@ potos_firstboot_initial_user_delete_admin_iso_user: true
 # Ask change disk encryption password
 potos_firstboot_ask_change_disk_enc_pw: true
 
-# Not implemented yet:
-potos_firstboot_initial_user_change_password: false
-potos_firstboot_local_user_with_sudo_ask_nopass: false
+
+# Don't change unless you are not using the Potos playbooks
+potos_firstboot_client_name: "{{ potos_plays_client_short_name | default('potos') }}"
