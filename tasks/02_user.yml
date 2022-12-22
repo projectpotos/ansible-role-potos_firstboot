@@ -1,0 +1,84 @@
+---
+- name: Get default username
+  ansible.builtin.shell:
+    cmd: |
+      awk -v val=1000 -F ":" '$3==val{print $1}' /etc/passwd
+  register: potos_firstboot_initial_username
+  changed_when: false
+  when:
+    - potos_firstboot_initial_user_delete_admin_iso_user
+
+- name: Ask new user
+  ansible.builtin.shell:
+    executable: '/bin/bash'
+    cmd: |
+      while [ ${POTOS_NEW_PASS} != ${POTOS_NEW_PASS2} -o -z ${POTOS_NEW_USER} ]; do
+        USERINPUT="$(yad --fullscreen --title '{{ potos_firstboot_client_name }} Setup' \
+          --borders 20 --align center \
+          --button gtk-ok \
+          --button "Change keyboard layout":"/setup/change-keyboard-layout.sh" \
+          --image-on-top --image=/setup/logo.png \
+          --text \
+      "IMPORTANT: If your password contains special characters, please remember to select the appropriate keyboard layout first.
+
+      Please enter your new credentials below
+      " \
+          --form \
+          --field 'Username' \
+          --field 'Password:H' \
+          --field 'Confirm password:H'
+        )"
+
+        POTOS_NEW_USER="$(echo ${USERINPUT} | cut -d '|' -f 1)"
+        POTOS_NEW_PASS="$(echo ${USERINPUT} | cut -d '|' -f 2)"
+        POTOS_NEW_PASS2="$(echo ${USERINPUT} | cut -d '|' -f 3)"
+
+        if [[ -z ${POTOS_NEW_USER} || -z ${POTOS_NEW_PASS} ]]; then
+          yad --title "{{ potos_firstboot_client_name }} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/logo.png \
+            --text 'Please choose and enter your new credentials.'
+        fi
+        if [[  ${POTOS_NEW_PASS} != ${POTOS_NEW_PASS2} ]]; then
+          yad --title "${POTOS_CLIENT_NAME} Setup" \
+            --borders 20 --align center --button gtk-ok --image-on-top \
+            --image=/setup/logo.png \
+            --text 'Your password was not identical. Please try again.'
+        fi
+      done
+      echo $POTOS_NEW_USER
+      echo $POTOS_NEW_PASS
+  register: potos_new_user_password
+  changed_when: false
+  when: potos_firstboot_local_user_add_with_sudo or potos_firstboot_local_user_add_without_sudo
+  tags:
+    - 'molecule-notest'
+
+- name: Add local user with sudo permission
+  ansible.builtin.user:
+    name: "{{ potos_new_user_password.stdout_lines[0] }}"
+    password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
+    groups: sudo
+    shell: "{{ potos_firstboot_local_user_add_shell }}"
+  when: potos_firstboot_local_user_add_with_sudo
+  tags:
+    - 'molecule-notest'
+
+- name: Add local user without sudo permission
+  ansible.builtin.user:
+    name: "{{ potos_new_user_password.stdout_lines[0] }}"
+    password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
+    shell: "{{ potos_firstboot_local_user_add_shell }}"
+  when: potos_firstboot_local_user_add_without_sudo
+  tags:
+    - 'molecule-notest'
+
+- name: Delete initial local user from env
+  ansible.builtin.user:
+    name: "{{ potos_firstboot_initial_username.stdout }}"
+    state: absent
+  when:
+    - potos_new_user_password.stdout_lines[0] != potos_firstboot_initial_username.stdout
+    - potos_firstboot_initial_user_delete_admin_iso_user
+  tags:
+    - 'molecule-notest'

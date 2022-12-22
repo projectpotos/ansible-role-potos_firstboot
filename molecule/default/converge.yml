@@ -4,7 +4,7 @@
   hosts: all
   gather_facts: yes
   vars:
-    runtype: 'firstboot'
+    runtype: 'setup'
     potos_new_luks_password: 'dummylukspassword'
   tasks:
     - name: run role
