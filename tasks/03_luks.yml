@@ -30,7 +30,7 @@
         POTOS_NEW_LUKS_PW="$(echo ${USERINPUT} | cut -d '|' -f 1)"
         POTOS_NEW_LUKS_PW2="$(echo ${USERINPUT} | cut -d '|' -f 2)"
 
-        if [[ -z ${POTOS_NEW_LUKS_PW} ]]; then
+        if [[ -z ${POTOS_NEW_LUKS_PW} || -z ${POTOS_NEW_LUKS_PW2} ]]; then
           yad --title "{{ potos_firstboot_client_name }} Setup" \
             --borders 20 --align center --button gtk-ok --image-on-top \
             --image=/setup/potos.png \
