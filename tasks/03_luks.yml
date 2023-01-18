@@ -5,45 +5,6 @@
   register: potos_firstboot_is_crypt
   changed_when: false
 
-- name: Ask old disk encryption password
-  ansible.builtin.shell:
-    executable: '/bin/bash'
-    cmd: |
-      while [ ${POTOS_OLD_LUKS_PW_GIVEN} != "correct" ]; do
-        USERINPUT="$(yad --fullscreen --title '{{ potos_firstboot_client_name }} Setup' \
-          --borders 20 --align center \
-          --button gtk-ok \
-          --button "Change keyboard layout":"/setup/change-keyboard-layout.sh" \
-          --image-on-top --image=/setup/logo.png \
-          --text \
-      "Your disk encryption password needs to be changed now, because the default password is unsecure.
-
-      Before you can choose the new disk encryption password, please enter the current initial disk encryption password below.
-      " \
-          --form \
-          --field 'Current Disk Encryption Password:H' \
-        )"
-
-        POTOS_OLD_LUKS_PW="$(echo ${USERINPUT} | cut -d '|' -f 1)"
-        eval "$(awk '/crypt/ {print $2}' /etc/crypttab)" && LUKS_DEVICE="$(realpath "/dev/disk/by-uuid/${UUID}")"
-        printf '%s\n' '$POTOS_OLD_LUKS_PW' | sudo cryptsetup luksOpen --test-passphrase $LUKS_DEVICE
-        if [[ $? == 0 ]]; then; echo "seems to be ok"; else; echo "that was wr00ng"
-
-        if [[ -z ${POTOS_OLD_LUKS_PW} } ]]; then
-          yad --title "{{ potos_firstboot_client_name }} Setup" \
-            --borders 20 --align center --button gtk-ok --image-on-top \
-            --image=/setup/logo.png \
-            --text 'Please choose and enter your new credentials.'
-        fi
-      done
-      echo $POTOS_OLD_LUKS_PW
-  register: potos_old_luks_password
-  when:
-    - potos_firstboot_ask_change_disk_enc_pw
-    - potos_firstboot_is_crypt.stdout != '0'
-  tags:
-    - 'molecule-notest'
-
 - name: Change disk encryption password
   ansible.builtin.shell:
     executable: '/bin/bash'
@@ -100,7 +61,7 @@
         fi
       done
 
-      #Change Disk Encryption Password now
+      #Change disk encryption password now
       eval "$(awk '/crypt/ {print $2}' /etc/crypttab)" && LUKS_DEVICE="$(realpath "/dev/disk/by-uuid/${UUID}")"
       printf '%s\n' "${POTOS_OLD_LUKS_PW}" "${POTOS_NEW_LUKS_PW}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
       if [[ $? -ne 0 ]]; then
