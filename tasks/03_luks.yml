@@ -111,11 +111,14 @@
 - name: Change boot disk encryption luks password now
   ansible.builtin.shell:
     executable: '/bin/bash'
+    environment:
+      POTOS_OLD_LUKS_PW: "{{ POTOS_OLD_LUKS_PW }}"
+      POTOS_NEW_LUKS_PW: "{{ POTOS_NEW_LUKS_PW }}"
     cmd: |
       eval "$(awk '/crypt/ {print $2}' /etc/crypttab)" && LUKS_DEVICE="$(realpath "/dev/disk/by-uuid/${UUID}")"
-      printf '%s\n' '{{ env.vars.POTOS_OLD_LUKS_PW }}' "{{ env_vars.POTOS_NEW_LUKS_PW }}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
+      printf '%s\n' "{{ POTOS_OLD_LUKS_PW }}" "{{ POTOS_NEW_LUKS_PW }}" | cryptsetup luksChangeKey "${LUKS_DEVICE}" -q
       if [[ $? -ne 0 ]]; then
-        echo "# Failed to change primary disk encryption key"
+        echo "# Failed to change primary disk encryption key."
         exit 1
       fi
   when:
