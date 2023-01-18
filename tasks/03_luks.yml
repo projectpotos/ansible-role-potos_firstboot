@@ -99,8 +99,8 @@
             --text 'Your password was not identical. Please try again.'
         fi
       done
-      echo $POTOS_OLD_LUKS_PW
-      echo $POTOS_NEW_LUKS_PW
+      export $POTOS_OLD_LUKS_PW
+      export $POTOS_NEW_LUKS_PW
   register: potos_new_luks_password
   when:
     - potos_firstboot_ask_change_disk_enc_pw
