@@ -14,7 +14,7 @@
           --borders 20 --align center \
           --button gtk-ok \
           --button "Change keyboard layout":"/setup/change-keyboard-layout.sh" \
-          --image-on-top --image=/setup/potos.png \
+          --image-on-top --image=/setup/logo.png \
           --text \
       "Your disk encryption password needs to be changed now, because the default password is unsecure.
 
@@ -33,13 +33,13 @@
         if [[ -z ${POTOS_NEW_LUKS_PW} || -z ${POTOS_NEW_LUKS_PW2} ]]; then
           yad --title "{{ potos_firstboot_client_name }} Setup" \
             --borders 20 --align center --button gtk-ok --image-on-top \
-            --image=/setup/potos.png \
+            --image=/setup/logo.png \
             --text 'Please choose and enter your new credentials.'
         fi
         if [[  ${POTOS_NEW_LUKS_PW} != ${POTOS_NEW_LUKS_PW2} ]]; then
           yad --title "{{ potos_firstboot_client_name }} Setup" \
             --borders 20 --align center --button gtk-ok --image-on-top \
-            --image=/setup/potos.png \
+            --image=/setup/logo.png \
             --text 'Your password was not identical. Please try again.'
         fi
       done
