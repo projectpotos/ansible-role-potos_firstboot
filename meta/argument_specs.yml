@@ -30,18 +30,27 @@ argument_specs:
         type: bool
         required: false
         default: true
-      potos_firstboot_local_user_add_with_sudo:
+      potos_firstboot_local_user_add:
         description:
-          - Ask to create a new local user, sudo (admin) rights included
+          - Ask to create a new local user
         type: bool
         required: false
         default: true
-      potos_firstboot_local_user_add_without_sudo:
+      potos_firstboot_local_groups:
         description:
-          - Ask to create a new local user, without sudo (admin) rights.
-        type: bool
+          - Local groups to create
+        type: list
+        elements: str
         required: false
-        default: false
+        default: []
+      potos_firstboot_local_user_groups:
+        description:
+          - Local groups the local user is added to
+        type: list
+        elements: str
+        required: false
+        default:
+          - sudo
       potos_firstboot_local_user_add_shell:
         description:
           - Define the new user shell, we recommend /bin/bash

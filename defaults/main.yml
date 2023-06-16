@@ -17,11 +17,15 @@ potos_firstboot_ask_select_keyboardlayout: 'Please select your keyboard layout'
 # Ask Hostname in an extra popup
 potos_firstboot_ask_hostname: true
 
-## Local User Handling
-# Ask to create a new local user, sudo (admin) rights included
-potos_firstboot_local_user_add_with_sudo: true
-# Ask to create local user, without sudo (admin) rights.
-potos_firstboot_local_user_add_without_sudo: false
+## Local User and Group Handling
+# Ask to create a new local user
+potos_firstboot_local_user_add: true
+# List of local groups to create
+potos_firstboot_local_groups: []
+# List of local groups the local user should be added to
+# "sudo" will give full root access via sudo
+potos_firstboot_local_user_groups:
+  - sudo
 # Define its shell, we recommend /bin/bash
 potos_firstboot_local_user_add_shell: /bin/bash
 
@@ -32,7 +36,6 @@ potos_firstboot_initial_user_delete_admin_iso_user: true
 
 # Ask change disk encryption password
 potos_firstboot_ask_change_disk_enc_pw: true
-
 
 # Don't change unless you are not using the Potos playbooks
 potos_firstboot_client_name: "{{ potos_plays_client_short_name | default('potos') }}"
