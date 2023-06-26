@@ -2,6 +2,11 @@
 # At least Ansible 2.12 is needed due to used features like 'argument_specs'
 ansible>=2.12
 
-# Required for testing
-ansible-lint[yamllint]
-molecule[docker, lint]
+## ansible/yaml lint
+ansible-lint~=6.17.2
+yamllint~=1.32.0
+
+## molecule tests
+molecule~=5.1.0
+molecule-plugins~=23.4.1
+docker~=6.1.3
