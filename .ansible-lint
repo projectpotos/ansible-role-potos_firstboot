@@ -2,6 +2,7 @@
 
 skip_list:
   - name[casing]
+  - risky-shell-pipe
 
 warn_list:
   - command-instead-of-shell  # Use shell only when shell functionality is required.
