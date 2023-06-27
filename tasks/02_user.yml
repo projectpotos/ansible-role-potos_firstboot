@@ -50,26 +50,46 @@
       echo $POTOS_NEW_PASS
   register: potos_new_user_password
   changed_when: false
-  when: potos_firstboot_local_user_add_with_sudo or potos_firstboot_local_user_add_without_sudo
+  when: potos_firstboot_local_user_add
   tags:
     - 'molecule-notest'
 
-- name: Add local user with sudo permission
-  ansible.builtin.user:
-    name: "{{ potos_new_user_password.stdout_lines[0] }}"
-    password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
-    groups: sudo
-    shell: "{{ potos_firstboot_local_user_add_shell }}"
-  when: potos_firstboot_local_user_add_with_sudo
+- name: Add local groups
+  ansible.builtin.group:
+    name: "{{ item }}"
+    system: true
+  loop: "{{ potos_firstboot_local_groups }}"
+  when:
+    - potos_firstboot_local_groups is defined
+    - potos_firstboot_local_groups is iterable
+    - potos_firstboot_local_groups is not string
+    - potos_firstboot_local_groups is not mapping
   tags:
     - 'molecule-notest'
 
-- name: Add local user without sudo permission
+- name: use potos_firstboot_local_user_groups list
+  ansible.builtin.set_fact:
+    potos_firstboot_local_user_groups_list: "{{ potos_firstboot_local_user_groups }}"
+  when:
+    - potos_firstboot_local_user_add
+    - potos_firstboot_local_user_groups is defined
+    - potos_firstboot_local_user_groups is iterable
+    - potos_firstboot_local_user_groups is not string
+    - potos_firstboot_local_user_groups is not mapping
+
+- name: use empty group list, potos_firstboot_local_user_groups unset or invalid
+  ansible.builtin.set_fact:
+    potos_firstboot_local_user_groups_list: []
+  when: potos_firstboot_local_user_groups_list is not defined
+
+- name: Add local user with secondary group memberships
   ansible.builtin.user:
     name: "{{ potos_new_user_password.stdout_lines[0] }}"
     password: "{{ potos_new_user_password.stdout_lines[1] | password_hash('sha512') }}"
+    groups: "{{ potos_firstboot_local_user_groups_list | join(',') }}"
     shell: "{{ potos_firstboot_local_user_add_shell }}"
-  when: potos_firstboot_local_user_add_without_sudo
+  when:
+    - potos_firstboot_local_user_add
   tags:
     - 'molecule-notest'
 
@@ -78,7 +98,7 @@
     name: "{{ potos_firstboot_initial_username.stdout }}"
     state: absent
   when:
-    - potos_new_user_password.stdout_lines[0] != potos_firstboot_initial_username.stdout
     - potos_firstboot_initial_user_delete_admin_iso_user
+    - ( not potos_firstboot_local_user_add or ( potos_new_user_password.stdout_lines[0] != potos_firstboot_initial_username.stdout ) )
   tags:
     - 'molecule-notest'
