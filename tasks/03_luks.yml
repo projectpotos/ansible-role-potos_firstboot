@@ -13,7 +13,7 @@
         USERINPUT="$(yad --fullscreen --title '{{ potos_firstboot_client_name }} Setup' \
           --borders 20 --align center \
           --button gtk-ok \
-          --button "Change keyboard layout":"/setup/change-keyboard-layout.sh" \
+          --button "Change keyboard layout":"/setup/change-keyboard-layout" \
           --image-on-top --image=/setup/logo.png \
           --text \
       "Your disk encryption password needs to be changed now, because the default password is unsecure.
